@@ -54,10 +54,6 @@ namespace Ispit_API.Controllers
         {
             try
             {
-                if (toDoList.Id == 0)
-                {
-                    toDoList.Id = _context.ToDoLists.Max(x => x.Id) + 1;
-                }
 
                 var result = _context.ToDoLists.Add(toDoList);
                 _context.SaveChanges();
@@ -75,12 +71,20 @@ namespace Ispit_API.Controllers
         {
             try
             {
-                var result = _context.ToDoLists.FirstOrDefault(s => s.Id == id);    
+                var result = _context.ToDoLists.FirstOrDefault(s => s.Id == id);
+
+                if (result == null)
+                {
+                    return NotFound("Zapis nije pronađen!");
+                }
+                if(!ModelState.IsValid)
+                {
+                    return BadRequest("Neodgovarajući oblik podatka. Pokušajte ponovo!");
+                }
+
                 result.Title = update_list.Title;
                 result.Description = update_list.Description;
                 result.IsCompleted = update_list.IsCompleted;
-
-                //var result2 = _context.ToDoLists.Update(update_list);
 
                 _context.SaveChanges();
 
@@ -97,11 +101,15 @@ namespace Ispit_API.Controllers
             try
             {
                 var result = _context.ToDoLists.FirstOrDefault(r => r.Id == id);
-                _context.ToDoLists.Remove(result);
 
+                if (result == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, "Rezultat nije pronađen!");
+                }
+                _context.ToDoLists.Remove(result);
                 _context.SaveChanges();
 
-                return Ok();
+                return Ok("Uspješno brisanje!");
 
             }
             catch (Exception ex)
